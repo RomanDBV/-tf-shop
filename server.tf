@@ -10,7 +10,7 @@ data "aws_ami" "al2023" {
 
 resource "aws_security_group" "web" {
   name   = "${var.project}-sg"
-  vpc_id = aws_vpc.main.id
+  vpc_id = module.network.vpc_id
 
   ingress {
     from_port   = 80
@@ -25,12 +25,16 @@ resource "aws_security_group" "web" {
     protocol    = "-1"
     cidr_blocks = ["0.0.0.0/0"]
   }
+  
+  tags = merge(local.common_tags, {
+    Name = "${local.name_prefix}-sg"
+  })
 }
 
 resource "aws_instance" "web" {
-  ami                    = data.aws_ami.al2023.id
-  instance_type          = var.instance_type
-  subnet_id              = aws_subnet.public.id
+  ami = "ami-030f85e68f5db92a9"
+  instance_type = local.instance_type
+  subnet_id = module.network.subnet_ids["public-a"]
   vpc_security_group_ids = [aws_security_group.web.id]
 
   user_data = <<-EOF
@@ -40,6 +44,8 @@ resource "aws_instance" "web" {
     docker run -d -p 80:80 nginx:1.27-alpine
   EOF
 
-  tags = { Name = "${var.project}-server" }
+  tags = merge(local.common_tags, {
+    Name = "${local.name_prefix}-server"
+  })
 }
 

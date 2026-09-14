@@ -7,3 +7,7 @@ output "url" {
   value = "http://${aws_instance.web.public_ip}"
 }
 
+output "subnet_ids" {
+  value = module.network.subnet_ids
+}
+
