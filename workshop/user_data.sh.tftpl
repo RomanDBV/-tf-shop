@@ -1,0 +1,11 @@
+#!/bin/bash
+
+dnf install -y docker awscli
+systemctl enable --now docker
+
+aws s3 cp s3://${bucket_name}/hello.txt /tmp/hello.txt
+
+docker run -d \
+  --name nginx \
+  -p 80:80 \
+  nginx:1.27-alpine
